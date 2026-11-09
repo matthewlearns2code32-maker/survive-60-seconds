@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survive 60 Seconds</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>SURVIVE 60 SECONDS</h1>
+
+  <!-- The "arena" holds the HUD and the game together, so fullscreen
+       mode can make BOTH of them big at the same time. -->
+  <div id="arena" class="arena">
+
+  <!-- HUD = "heads-up display": the score, hearts and timer.
+       game.js fills in these numbers while you play. -->
+  <div class="hud">
+    <span>SCORE <b id="score">0</b> <small class="best">BEST <b id="best">0</b></small></span>
+    <span id="hearts" class="hearts">♥♥♥</span>
+    <span class="cloak">
+      CLOAK
+      <span class="meter"><span id="cloak-fill" class="ready"></span></span>
+      <b id="cloak-label">READY</b>
+    </span>
+    <span>TIME <b id="timer">60</b></span>
+  </div>
+
+  <div class="game-wrap">
+    <!-- The canvas is the "screen" the game draws on.
+         It is only 320 x 240 pixels inside, then style.css stretches it
+         to twice that size so every pixel looks big and chunky (retro!). -->
+    <canvas id="game" width="320" height="240"></canvas>
+
+    <!-- The overlay sits on top of the canvas for the start, win and
+         lose screens. game.js shows or hides it. -->
+    <div id="overlay" class="overlay">
+      <h2 id="overlay-title">READY?</h2>
+      <p id="overlay-message"></p>
+      <button id="start-button">START</button>
+      <p class="hint">or press SPACE</p>
+    </div>
+  </div>
+
+  </div> <!-- end of arena -->
+
+  <p class="instructions">
+    MOVE: <span class="key">W A S D</span> or <span class="key">ARROW KEYS</span>
+    &nbsp; CLOAK: <span class="key">SPACE</span>
+    &nbsp; FULLSCREEN: <span class="key">F</span>
+  </p>
+
+  <button id="fullscreen-button" class="small-button">⛶ FULLSCREEN</button>
+
+  <!-- Load the game code last, so everything above already exists. -->
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+/* Page look: dark arcade cabinet around a bright field. */
+
+body {
+  margin: 0;
+  padding: 16px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: #14121f;
+  color: #f4f0d9;
+  font-family: "Courier New", Courier, monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: #ffd23f;
+  text-shadow: 3px 3px 0 #c0392b;   /* hard shadow = classic arcade title */
+  margin: 8px 0 12px;
+  text-align: center;
+}
+
+/* ---------- Arena: the HUD + game, kept together ---------- */
+.arena {
+  width: 640px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---------- HUD: score, hearts, timer ---------- */
+.hud {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;             /* wrap onto two lines on narrow screens */
+  gap: 8px 16px;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.hud b {
+  color: #ffd23f;
+}
+
+.hud .best {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-left: 6px;
+}
+
+/* Cloak meter: a little bar that drains and refills. */
+.cloak {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cloak b {
+  font-size: 14px;
+  min-width: 100px;           /* stops the HUD jumping as the word changes */
+}
+
+.meter {
+  width: 60px;
+  height: 12px;
+  border: 2px solid #f4f0d9;
+  background: #000;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+}
+
+.meter .ready      { background: #4cc9f0; }  /* bright blue: go! */
+.meter .active     { background: #b8f2ff; }  /* pale glow while cloaked */
+.meter .recharging { background: #5a5873; }  /* grey while refilling */
+
+.hearts {
+  color: #e63946;
+  font-size: 24px;
+  letter-spacing: 4px;
+}
+
+/* ---------- The game screen ---------- */
+.game-wrap {
+  position: relative;          /* lets the overlay sit on top of the canvas */
+  width: 100%;                 /* as wide as the arena (640px = 2x the canvas) */
+  box-sizing: border-box;
+  border: 6px solid #f4f0d9;
+  box-shadow: 8px 8px 0 #000;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;  /* keep pixels sharp instead of blurry */
+}
+
+/* ---------- Start / win / lose screen ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;                    /* cover the whole canvas */
+  background: rgba(20, 18, 31, 0.82);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay h2 {
+  font-size: 36px;
+  letter-spacing: 4px;
+  color: #ffd23f;
+  text-shadow: 3px 3px 0 #c0392b;
+  margin: 0 0 12px;
+}
+
+.overlay p {
+  max-width: 420px;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.overlay .hint {
+  font-size: 13px;
+  opacity: 0.7;
+  margin: 10px 0 0;
+}
+
+button {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  padding: 10px 24px;
+  background: #ffd23f;
+  color: #14121f;
+  border: none;
+  box-shadow: 4px 4px 0 #c0392b;
+  cursor: pointer;
+}
+
+button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #c0392b;
+}
+
+.instructions {
+  margin-top: 20px;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.key {
+  background: #f4f0d9;
+  color: #14121f;
+  padding: 2px 6px;
+  font-weight: bold;
+}
+
+.small-button {
+  font-size: 16px;
+  padding: 8px 16px;
+  margin-top: 4px;
+}
+
+/* ---------- Fullscreen mode ----------
+   ":fullscreen" only applies while the arena fills the whole screen.
+   The game must keep its 4:3 shape (320 x 240), so its width is the
+   SMALLER of: the screen's width, or what fits the screen's height. */
+.arena:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  justify-content: center;
+  background: #14121f;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.arena:fullscreen .hud,
+.arena:fullscreen .game-wrap {
+  width: min(calc(100vw - 48px), calc((100vh - 120px) * 4 / 3));
+}
+
+.arena:fullscreen .hud {
+  font-size: 26px;
+  flex-wrap: nowrap;           /* one line, so the field gets all the height */
+}
+
+.arena:fullscreen .hearts {
+  font-size: 32px;
+}
+
+.arena:fullscreen .best {
+  font-size: 20px;
+}
+
+.arena:fullscreen .cloak b {
+  font-size: 18px;
+  min-width: 130px;
+}
+
+.arena:fullscreen .meter {
+  width: 80px;
+  height: 18px;
+}
+
+.arena:fullscreen .overlay h2 {
+  font-size: 72px;
+}
+
+.arena:fullscreen .overlay p {
+  font-size: 24px;
+  max-width: 720px;
+}
+
+.arena:fullscreen button {
+  font-size: 32px;
+}
