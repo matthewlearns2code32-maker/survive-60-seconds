@@ -32,22 +32,31 @@
          to twice that size so every pixel looks big and chunky (retro!). -->
     <canvas id="game" width="320" height="240"></canvas>
 
+    <!-- Phones only: a big round button for the cloak, in the corner of the
+         field. (style.css hides it unless the page is in "touch" mode.) -->
+    <button id="cloak-button" class="cloak-button ready">CLOAK</button>
+
     <!-- The overlay sits on top of the canvas for the start, win and
          lose screens. game.js shows or hides it. -->
     <div id="overlay" class="overlay">
       <h2 id="overlay-title">READY?</h2>
       <p id="overlay-message"></p>
       <button id="start-button">START</button>
-      <p class="hint">or press SPACE</p>
+      <p class="hint keys-only">or press SPACE</p>
     </div>
   </div>
 
   </div> <!-- end of arena -->
 
-  <p class="instructions">
+  <!-- Keyboard instructions on computers, touch instructions on phones. -->
+  <p class="instructions keys-only">
     MOVE: <span class="key">W A S D</span> or <span class="key">ARROW KEYS</span>
     &nbsp; CLOAK: <span class="key">SPACE</span>
     &nbsp; FULLSCREEN: <span class="key">F</span>
+  </p>
+  <p class="instructions touch-only">
+    MOVE: <span class="key">DRAG ON THE FIELD</span>
+    &nbsp; CLOAK: <span class="key">TAP THE BUTTON</span>
   </p>
 
   <button id="fullscreen-button" class="small-button">⛶ FULLSCREEN</button>

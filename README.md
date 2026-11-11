@@ -35,6 +35,7 @@ After changing code, save the file (Ctrl+S) and refresh the browser (F5) if you'
 - 60-second timer; it stops when the round ends
 - Best score (most trophies in one round) saved in the browser, shown in the HUD
 - Fullscreen mode (button or F key; Esc or F to leave): the field, HUD and messages grow to fill the screen, keeping the 4:3 shape — added after play-testing so it's easier to see
+- **Phones and tablets:** floating joystick (touch anywhere on the field and drag; drag distance = speed), round CLOAK button in the corner (works with a second finger while steering), no scrolling/zooming while playing, layouts for upright and sideways phones; keyboard play unchanged. The fullscreen button hides itself where the browser can't do fullscreen (e.g. iPhone Safari)
 
 **Special ability — CLOAK (Space):**
 - Leaves a decoy that looks exactly like you; every defender chases it

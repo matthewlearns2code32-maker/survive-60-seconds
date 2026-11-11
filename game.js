@@ -304,6 +304,113 @@ document.addEventListener("fullscreenchange", () => {
     : "⛶ FULLSCREEN";
 });
 
+// Some browsers (like Safari on iPhone) can't make a page fullscreen:
+// hide the button there instead of showing one that does nothing.
+if (!document.fullscreenEnabled) fullscreenButton.hidden = true;
+
+
+// ---------------------------------------------------------------------
+//  TOUCH CONTROLS — for phones and tablets.
+//
+//  FLOATING JOYSTICK: put a finger anywhere on the field and drag.
+//  Where the finger first touched becomes the joystick's center, and the
+//  direction + distance you drag become the player's direction + speed:
+//
+//        touch here ●───────○ finger now
+//                   (center)   drag 28 pixels or more = full speed
+//
+//  CLOAK BUTTON: a round button in the field's corner (in index.html).
+//
+//  "Pointer events" handle fingers, pens and mice with the same code.
+// ---------------------------------------------------------------------
+const cloakButton = document.getElementById("cloak-button");
+const JOYSTICK_RADIUS = 28;     // drag this far (canvas pixels) for full speed
+const JOYSTICK_DEAD_ZONE = 0.15; // tiny wobbles under 15% don't move you
+
+const joystick = {
+  active: false,
+  pointerId: null,  // which finger is steering (so a second finger can cloak)
+  originX: 0,       // where that finger first touched (canvas pixels)
+  originY: 0,
+  x: 0,             // where that finger is now
+  y: 0,
+};
+
+// Switch the page into "touch mode": shows the cloak button and touch
+// instructions (style.css looks for the "touch" class on <body>).
+function enableTouchMode() {
+  if (document.body.classList.contains("touch")) return;
+  document.body.classList.add("touch");
+  if (game.state === "start") overlayMessage.textContent = introMessage();
+}
+if (window.matchMedia("(pointer: coarse)").matches) enableTouchMode(); // a touch screen
+window.addEventListener("touchstart", enableTouchMode, { passive: true }); // or the first touch
+
+// The page is stretched by CSS, so convert a finger's screen position
+// into the canvas's own 320 x 240 pixels.
+function toCanvasPoint(event) {
+  const box = canvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - box.left) * (canvas.width / box.width),
+    y: (event.clientY - box.top) * (canvas.height / box.height),
+  };
+}
+
+canvas.addEventListener("pointerdown", (event) => {
+  if (event.pointerType === "mouse") return; // mouse players have the keyboard
+  if (joystick.active) return;               // already steering with another finger
+  event.preventDefault();
+  const point = toCanvasPoint(event);
+  joystick.active = true;
+  joystick.pointerId = event.pointerId;
+  joystick.originX = joystick.x = point.x;
+  joystick.originY = joystick.y = point.y;
+  // Keep following this finger even if it slides off the field.
+  // (try/catch: if the browser refuses, the joystick still works on the field.)
+  try {
+    canvas.setPointerCapture(event.pointerId);
+  } catch (error) {
+    // not fatal
+  }
+});
+
+canvas.addEventListener("pointermove", (event) => {
+  if (!joystick.active || event.pointerId !== joystick.pointerId) return;
+  const point = toCanvasPoint(event);
+  joystick.x = point.x;
+  joystick.y = point.y;
+});
+
+function releaseJoystick(event) {
+  if (event.pointerId !== joystick.pointerId) return;
+  joystick.active = false;
+  joystick.pointerId = null;
+}
+canvas.addEventListener("pointerup", releaseJoystick);
+canvas.addEventListener("pointercancel", releaseJoystick); // e.g. a phone call interrupts
+
+// The joystick as a direction: { x, y } with length 0 (center) to 1 (full speed),
+// or null when no finger is steering.
+function joystickDirection() {
+  if (!joystick.active) return null;
+  let dx = (joystick.x - joystick.originX) / JOYSTICK_RADIUS;
+  let dy = (joystick.y - joystick.originY) / JOYSTICK_RADIUS;
+  const length = Math.hypot(dx, dy);
+  if (length < JOYSTICK_DEAD_ZONE) return { x: 0, y: 0 };
+  if (length > 1) {  // dragged past the edge: full speed, no faster
+    dx /= length;
+    dy /= length;
+  }
+  return { x: dx, y: dy };
+}
+
+// "pointerdown" instead of "click" so the cloak fires the instant you
+// touch it — clicks only happen when the finger lifts.
+cloakButton.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  if (game.state === "playing") useCloak();
+});
+
 
 // ---------------------------------------------------------------------
 //  STARTING AND ENDING A ROUND
@@ -554,6 +661,14 @@ function movePlayer(seconds) {
     dirY *= Math.SQRT1_2;
   }
 
+  // 2b. No keys pressed? Use the touch joystick, if a finger is on it.
+  //     (Its direction is already at most 1 long, so no diagonal speed-up.)
+  const stick = joystickDirection();
+  if (stick && dirX === 0 && dirY === 0) {
+    dirX = stick.x;
+    dirY = stick.y;
+  }
+
   // 3. Move: distance = speed x time.
   const oldX = player.x;
   const oldY = player.y;
@@ -760,8 +875,30 @@ function draw() {
     ctx.globalAlpha = 1;
   }
 
+  drawJoystick();
   drawCountdown();
   updateHud();
+}
+
+// The floating joystick: a faint ring where your finger first touched,
+// and a knob that follows your finger (but never leaves the ring).
+function drawJoystick() {
+  if (!joystick.active) return;
+  const stick = joystickDirection() || { x: 0, y: 0 };
+  const knobX = joystick.originX + stick.x * JOYSTICK_RADIUS;
+  const knobY = joystick.originY + stick.y * JOYSTICK_RADIUS;
+
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = "#f4f0d9";
+  ctx.beginPath();
+  ctx.arc(joystick.originX, joystick.originY, JOYSTICK_RADIUS, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.arc(knobX, knobY, 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
 }
 
 function drawField() {
@@ -900,6 +1037,17 @@ function updateHud() {
   cloakFill.style.width = `${fullness * 100}%`;
   cloakFill.className = status;           // style.css colors each status
   cloakLabel.textContent = status.toUpperCase();
+  cloakButton.className = "cloak-button " + status; // the phone button matches
+}
+
+/** The start-screen text, for keyboards or for touch screens. */
+function introMessage() {
+  if (document.body.classList.contains("touch")) {
+    return "Grab trophies. Dodge the red defenders. Drag on the field to move. " +
+      "Tap CLOAK to leave a decoy and walk through defenders unseen. Last 60 seconds to win!";
+  }
+  return "Grab trophies. Dodge the red defenders. Press SPACE to CLOAK: " +
+    "leave a decoy and walk through defenders unseen. Last 60 seconds to win!";
 }
 
 
@@ -924,7 +1072,5 @@ function gameLoop(now) {
 
 // Set up the field behind the start screen, then begin the loop.
 resetRound();
-overlayMessage.textContent =
-  "Grab trophies. Dodge the red defenders. Press SPACE to CLOAK: " +
-  "leave a decoy and walk through defenders unseen. Last 60 seconds to win!";
+overlayMessage.textContent = introMessage(); // keyboard or touch version
 requestAnimationFrame(gameLoop);

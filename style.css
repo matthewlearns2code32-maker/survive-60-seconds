@@ -178,6 +178,106 @@ button:active {
   margin-top: 4px;
 }
 
+/* =====================================================================
+   PHONES AND TABLETS
+   game.js adds the class "touch" to <body> on touch screens.
+   ===================================================================== */
+
+/* No double-tap zoom on buttons. */
+html {
+  touch-action: manipulation;
+}
+
+/* While playing, touches on the field steer the player — so the browser
+   must not scroll, zoom, select text or show a long-press menu there. */
+.game-wrap,
+.game-wrap canvas {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Show keyboard OR touch instructions, never both. */
+.touch-only { display: none; }
+body.touch .touch-only { display: block; }
+body.touch .keys-only { display: none; }
+
+/* The round CLOAK button in the field's bottom-right corner. */
+.cloak-button {
+  display: none;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 11px;
+  letter-spacing: 1px;
+  box-shadow: 3px 3px 0 #000;
+  touch-action: none;
+}
+
+body.touch .cloak-button { display: block; }
+
+/* Same colors as the cloak meter in the HUD. */
+.cloak-button.ready      { background: rgba(76, 201, 240, 0.85); color: #14121f; }
+.cloak-button.active     { background: rgba(184, 242, 255, 0.9); color: #14121f; }
+.cloak-button.recharging { background: rgba(90, 88, 115, 0.85); color: #f4f0d9; }
+
+/* ---------- Narrow screens (phones held upright) ---------- */
+@media (max-width: 600px) {
+  body { padding: 8px; }
+
+  h1 {
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 #c0392b;
+    margin: 4px 0 8px;
+  }
+
+  .hud {
+    font-size: 13px;
+    letter-spacing: 1px;
+    gap: 4px 10px;
+    margin-bottom: 6px;
+  }
+  .hearts { font-size: 16px; letter-spacing: 2px; }
+  .hud .best { font-size: 10px; }
+  .cloak { gap: 4px; }
+  .cloak b { font-size: 10px; min-width: 70px; }
+  .meter { width: 40px; height: 8px; border-width: 1px; }
+
+  .game-wrap {
+    border-width: 3px;
+    box-shadow: 4px 4px 0 #000;
+  }
+
+  .overlay { padding: 8px; }
+  .overlay h2 { font-size: 22px; letter-spacing: 2px; margin-bottom: 6px; }
+  .overlay p { font-size: 12px; line-height: 1.35; margin-bottom: 8px; }
+
+  button { font-size: 16px; padding: 8px 18px; }
+  .cloak-button { width: 54px; height: 54px; font-size: 10px; right: 8px; bottom: 8px; }
+
+  .instructions { font-size: 12px; text-align: center; margin-top: 14px; line-height: 2.2; }
+  .instructions .key { white-space: nowrap; } /* never split a label across lines */
+}
+
+/* ---------- Short screens (phones held sideways) ----------
+   Hide the title and instructions so the field gets all the height,
+   and size the field by the screen's HEIGHT (keeping its 4:3 shape). */
+@media (orientation: landscape) and (max-height: 500px) {
+  body { padding: 4px; }
+  h1, .instructions { display: none; }
+  .arena { width: min(100%, calc((100vh - 48px) * 4 / 3)); }
+  /* dvh = the height you can actually see (phones' address bars come and go) */
+  .arena { width: min(100%, calc((100dvh - 48px) * 4 / 3)); }
+  .hud { flex-wrap: nowrap; font-size: 12px; margin-bottom: 4px; }
+}
+
 /* ---------- Fullscreen mode ----------
    ":fullscreen" only applies while the arena fills the whole screen.
    The game must keep its 4:3 shape (320 x 240), so its width is the
